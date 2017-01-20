@@ -44,20 +44,32 @@ void StandardShadingPerLight( Shared, float3 L, float3 V, half3 N )
 }
 #endif
 
-float3 StandardShading( float3 DiffuseColor, float3 SpecularColor, float3 LobeRoughness, float3 LobeEnergy, float3 L, float3 V, half3 N )
+//float3 StandardShading( float3 DiffuseColor, float3 SpecularColor, float3 LobeRoughness, float3 LobeEnergy, float3 L, float3 V, half3 N )
+float3 StandardShading( FGBufferData GBuffer, float3 LobeRoughness, float3 LobeEnergy, float3 L, float3 V, half3 N )
 {
 	float3 H = normalize(V + L);
 	float NoL = saturate( dot(N, L) );
 	float NoV = saturate( abs( dot(N, V) ) + 1e-5 );
 	float NoH = saturate( dot(N, H) );
 	float VoH = saturate( dot(V, H) );
-	
-	// Generalized microfacet specular
-	float D = D_GGX( LobeRoughness[1], NoH ) * LobeEnergy[1];
-	float Vis = Vis_SmithJointApprox( LobeRoughness[1], NoV, NoL );
-	float3 F = F_Schlick( SpecularColor, VoH );
 
-	float3 Diffuse = Diffuse_Lambert( DiffuseColor );
+	float D = LobeEnergy[1];
+
+	if (GBuffer.ShadingModelID != SHADINGMODELID_TOON) // Compile time branch doesn't work here? Should be fixed to save branching on runtime.
+	{
+		// Generalized microfacet specular
+		D *= D_GGX(LobeRoughness[1], NoH) ;
+	}
+	else
+	{
+		D *= D_Toon_Flat(LobeRoughness[1], GBuffer.CustomData.y, NoH);
+	}
+
+
+	float Vis = Vis_SmithJointApprox( LobeRoughness[1], NoV, NoL );
+	float3 F = F_Schlick( GBuffer.SpecularColor, VoH );
+
+	float3 Diffuse = Diffuse_Lambert( GBuffer.DiffuseColor );
 	//float3 Diffuse = Diffuse_Burley( DiffuseColor, LobeRoughness[1], NoV, NoL, VoH );
 	//float3 Diffuse = Diffuse_OrenNayar( DiffuseColor, LobeRoughness[1], NoV, NoL, VoH );
 
@@ -711,7 +723,8 @@ float3 SurfaceShading( FGBufferData GBuffer, float3 LobeRoughness, float3 LobeEn
 		case SHADINGMODELID_PREINTEGRATED_SKIN:
 		case SHADINGMODELID_SUBSURFACE_PROFILE:
 		case SHADINGMODELID_TWOSIDED_FOLIAGE:
-			return StandardShading( GBuffer.DiffuseColor, GBuffer.SpecularColor, LobeRoughness, LobeEnergy, L, V, N );
+		case SHADINGMODELID_TOON:
+			return StandardShading( GBuffer, LobeRoughness, LobeEnergy, L, V, N);
 		case SHADINGMODELID_CLEAR_COAT:
 			return ClearCoatShading( GBuffer, LobeRoughness, LobeEnergy, L, V, N );
 		case SHADINGMODELID_CLOTH:

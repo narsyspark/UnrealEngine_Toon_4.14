@@ -269,4 +269,46 @@ float Vis_Cloth( float NoV, float NoL )
 	return rcp( 4 * ( NoL + NoV - NoL * NoV ) );
 }
 
+// Flattened version of D_Blinn for Toon shading model
+float D_Toon_Flat(float Roughness, float ToonRoughness, float NoH)
+{
+	float a = Roughness * Roughness;
+	float a2 = a * a;
+	float b = 1 - a2;
+	float c = 1 / ToonRoughness;
+	float n = 2 / a2 - 2;
+	return (n + 2) / (2 * PI) * saturate(((NoH - b) / a) * c);
+}
+
+//Simplified falloff for mobile rendering
+float Falloff_Toon_Flat(float NoL)
+{
+	// Slight smoothing on transition to compensate less/no AA on mobile
+	return saturate(NoL * (0.4f / (fwidth(NoL) + 0.0001f)));
+	// Even simpler alternative if the above is deemed too expensive
+	// return saturate(NoL * 20);
+}
+
+// Stepped light falloff for Toon shading model
+float Falloff_Toon_Stepped ( float NoL, float4 CustomData )
+{
+	float Blend = CustomData.x;
+	float Roughness = CustomData.y;
+	float Steps = 1 / CustomData.z;
+	float NoLS = NoL * Steps;
+	float Base = ceil(NoLS) / Steps;
+
+	//Branch to prevent divide by zero and save some instructions when Smoothing = 0
+	BRANCH
+	if (Roughness != 0)
+	{
+		float iR = 1 / Roughness;
+		float SmoothEdge = (1 - saturate((NoLS * iR) - (clamp(floor(NoLS), 0, Steps) * iR))) / Steps;
+		Base -= SmoothEdge;
+	}
+
+	Base = lerp(NoL, saturate(Base), Blend*Blend);
+	return saturate(Base);
+}
+
 #endif // __BRDF_COMMON__

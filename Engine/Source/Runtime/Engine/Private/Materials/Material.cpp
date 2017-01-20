@@ -4416,10 +4416,10 @@ bool UMaterial::IsPropertyActive(EMaterialProperty InProperty) const
 		Active = ShadingModel == MSM_Subsurface || ShadingModel == MSM_PreintegratedSkin || ShadingModel == MSM_TwoSidedFoliage || ShadingModel == MSM_Cloth;
 		break;
 	case MP_CustomData0:
-		Active = ShadingModel == MSM_ClearCoat || ShadingModel == MSM_Hair || ShadingModel == MSM_Cloth || ShadingModel == MSM_Eye;
+		Active = ShadingModel == MSM_ClearCoat || ShadingModel == MSM_Hair || ShadingModel == MSM_Cloth || ShadingModel == MSM_Eye || ShadingModel == MSM_Toon;
 		break;
 	case MP_CustomData1:
-		Active = ShadingModel == MSM_ClearCoat || ShadingModel == MSM_Eye;
+		Active = ShadingModel == MSM_ClearCoat || ShadingModel == MSM_Eye || ShadingModel == MSM_Toon;
 		break;
 	case MP_TessellationMultiplier:
 	case MP_WorldDisplacement:

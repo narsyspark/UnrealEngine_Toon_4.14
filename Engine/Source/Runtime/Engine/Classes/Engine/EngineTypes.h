@@ -422,6 +422,7 @@ enum EMaterialShadingModel
 	MSM_Hair				UMETA(DisplayName="Hair"),
 	MSM_Cloth				UMETA(DisplayName="Cloth"),
 	MSM_Eye					UMETA(DisplayName="Eye"),
+	MSM_Toon				UMETA(DisplayName = "Toon"),
 	MSM_MAX,
 };
 

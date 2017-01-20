@@ -766,7 +766,11 @@ void FPixelShaderInOut_MainPS(
 		#endif
 		GBuffer.CustomData.z = saturate( GetMaterialCustomData0(MaterialParameters) );	// Iris Mask
 		GBuffer.CustomData.w = saturate( GetMaterialCustomData1(MaterialParameters) );	// Iris Distance
-	#else
+	#elif MATERIAL_SHADINGMODEL_TOON
+		GBuffer.ShadingModelID = SHADINGMODELID_TOON;
+		GBuffer.CustomData.x = saturate( GetMaterialCustomData0(MaterialParameters) );
+		GBuffer.CustomData.y = saturate( GetMaterialCustomData1(MaterialParameters) );
+		GBuffer.CustomData.z = 1;
 		// missing shading model, compiler should report ShadingModelID is not set
 	#endif
 

@@ -512,6 +512,8 @@ FText UMaterialGraph::GetCustomDataPinName( uint32 Index ) const
 			return LOCTEXT("Cloth", "Cloth");
 		case MSM_Eye:
 			return LOCTEXT("IrisMask", "Iris Mask");
+		case MSM_Toon:
+			return LOCTEXT("ToonBlend", "Toon Blend");
 		default:
 			return LOCTEXT("CustomData0", "Custom Data 0");
 		}
@@ -524,6 +526,8 @@ FText UMaterialGraph::GetCustomDataPinName( uint32 Index ) const
 			return LOCTEXT("ClearCoatRoughness", "Clear Coat Roughness");
 		case MSM_Eye:
 			return LOCTEXT("IrisDistance", "Iris Distance");
+		case MSM_Toon:
+			return LOCTEXT("ToonRoughness", "Toon Roughness");
 		default:
 			return LOCTEXT("CustomData1", "Custom Data 1");
 		}

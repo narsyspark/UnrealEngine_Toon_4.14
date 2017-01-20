@@ -479,11 +479,19 @@ void Main(
 
 		float NoL = max(0, dot(MaterialParameters.WorldNormal, MobileDirectionalLight.DirectionalLightDirection));
 		float RoL = max(0, dot(MaterialParameters.ReflectionVector, MobileDirectionalLight.DirectionalLightDirection));
+		
+		#if MATERIAL_SHADINGMODEL_TOON
+			NoL = Falloff_Toon_Flat(NoL);
+		#endif
 
 		#if FULLY_ROUGH
 			Color += (Shadow * NoL) * MobileDirectionalLight.DirectionalLightColor.rgb * DiffuseColor;
 		#else
+			#if MATERIAL_SHADINGMODEL_TOON
+			Color += (Shadow * NoL) * MobileDirectionalLight.DirectionalLightColor.rgb * (DiffuseColor + SpecularColor * D_Toon_Flat(Roughness, 0.1f, RoL));
+			#else
 			Color += (Shadow * NoL) * MobileDirectionalLight.DirectionalLightColor.rgb * (DiffuseColor + SpecularColor * PhongApprox(Roughness, RoL));
+			#endif
 			// Environment map has been prenormalized, scale by lightmap luminance
 			half3 SpecularIBL = GetImageBasedReflectionLighting(MaterialParameters, Roughness) * IndirectIrradiance;
 			#if MATERIAL_PLANAR_FORWARD_REFLECTIONS
@@ -530,6 +538,10 @@ void Main(
 				float PointNoL = max(0, dot(MaterialParameters.WorldNormal, L));
 				float PointRoL = max(0, dot(MaterialParameters.ReflectionVector, L));
 
+				#if MATERIAL_SHADINGMODEL_TOON
+					PointNoL = Falloff_Toon_Flat(PointNoL);
+				#endif
+
 				float Attenuation;
 
 				if (LightColorAndFalloffExponent[i].w == 0)
@@ -546,7 +558,11 @@ void Main(
 				}
 
 				#if !FULLY_ROUGH
+					#if MATERIAL_SHADINGMODEL_TOON
+					Color += (Attenuation * PointNoL) * LightColorAndFalloffExponent[i].rgb * (DiffuseColor + SpecularColor * D_Toon_Flat(Roughness, 0.1f, PointRoL));
+					#else
 					Color += (Attenuation * PointNoL) * LightColorAndFalloffExponent[i].rgb * (DiffuseColor + SpecularColor * PhongApprox(Roughness, PointRoL));
+					#endif
 				#else
 					Color += (Attenuation * PointNoL) * LightColorAndFalloffExponent[i].rgb * DiffuseColor;
 				#endif

@@ -526,7 +526,15 @@ float4 GetDynamicLighting(float3 WorldPosition, float3 CameraVector, FGBufferDat
 				// accumulate surface
 				{
 					float3 SurfaceLighting = SurfaceShading(GBuffer, LobeRoughness, LobeEnergy, L, V, N, Random);
-					LightAccumulator_Add(LightAccumulator, SurfaceLighting, (1.0/PI), LightColor * (NoL * SurfaceAttenuation), bNeedsSeparateSubsurfaceLightAccumulation);
+				BRANCH
+				if (GBuffer.ShadingModelID == SHADINGMODELID_TOON)
+					{
+						LightAccumulator_Add(LightAccumulator, SurfaceLighting, (1.0/PI), LightColor * (Falloff_Toon_Stepped(NoL, GBuffer.CustomData) * SurfaceAttenuation), bNeedsSeparateSubsurfaceLightAccumulation);
+					}
+				else
+					{
+						LightAccumulator_Add(LightAccumulator, SurfaceLighting, (1.0/PI), LightColor * (NoL * SurfaceAttenuation), bNeedsSeparateSubsurfaceLightAccumulation);
+					}
 				}
 
 				// accumulate subsurface
